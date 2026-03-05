@@ -1,0 +1,67 @@
+{% extends 'base2.html' %}
+{% load i18n %}
+
+{% block content %}
+{% block dashboard_content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="animate-in fade-in duration-700">
+    <div class="mb-10">
+        <h2 class="logo-font text-3xl font-black text-gray-800 uppercase tracking-tight">{% translate "Platform" %} <span class="text-red-800">{% translate "Intelligence" %}</span></h2>
+        <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em]">{% translate "Data-Driven Insights into Sacred Tourism" %}</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-white p-8 rounded-[3rem] shadow-xl border border-amber-50">
+            <h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-8">{% translate "Most Visited Sacred Sites" %}</h4>
+            <canvas id="popularityChart" height="250"></canvas>
+        </div>
+
+        <div class="bg-white p-8 rounded-[3rem] shadow-xl border border-amber-100">
+            <h4 class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-8">{% translate "Category Diversity" %}</h4>
+            <canvas id="categoryChart" height="250"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Popularity Bar Chart
+    new Chart(document.getElementById('popularityChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ place_labels|safe }},
+            datasets: [{
+                label: '{% translate "Total Views" %}',
+                data: {{ place_views|safe }},
+                backgroundColor: '#D32F2F', // Saffron Red
+                borderRadius: 12,
+                barThickness: 20
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+        }
+    });
+
+    // Category Pie Chart
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ cat_labels|safe }},
+            datasets: [{
+                data: {{ cat_counts|safe }},
+                backgroundColor: ['#D32F2F', '#FFB800', '#1F2937', '#9CA3AF'],
+                borderWidth: 0,
+                hoverOffset: 20
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 10, weight: 'bold' }, padding: 20 } } }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}
+

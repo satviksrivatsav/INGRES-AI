@@ -1,0 +1,170 @@
+{% extends 'base2.html' %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="animate-in fade-in slide-in-from-bottom-6 duration-700">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-end mb-10">
+
+        <div>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                Water <span class="text-blue-600">Safety Checker</span>
+            </h2>
+
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                AI Drinking Water Quality Analysis
+            </p>
+        </div>
+
+        <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-blue-600 text-xs"></i>
+            <span class="text-[10px] font-black text-blue-800 uppercase tracking-widest">
+                Source Risk Intelligence
+            </span>
+        </div>
+
+    </div>
+
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+
+        <!-- FORM -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-blue-50 shadow-sm sticky top-6 h-fit">
+
+            <h4 class="font-black text-slate-800 uppercase text-xs tracking-widest mb-6">
+                Water Quality Input
+            </h4>
+
+
+            <form method="POST" class="space-y-6">
+
+                {% csrf_token %}
+
+
+                <div>
+
+                    <label class="text-[10px] font-black text-blue-900 uppercase tracking-widest block mb-2 ml-1">
+                        Area Type
+                    </label>
+
+                    <select name="area_type"
+                        class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700">
+
+                        <option value="urban">Urban</option>
+                        <option value="semi-urban">Semi Urban</option>
+                        <option value="rural">Rural</option>
+
+                    </select>
+
+                </div>
+
+
+
+                <div>
+
+                    <label class="text-[10px] font-black text-blue-900 uppercase tracking-widest block mb-2 ml-1">
+                        Water Source
+                    </label>
+
+                    <select name="source_type"
+                        class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700">
+
+                        <option value="borewell">Borewell</option>
+                        <option value="well">Well</option>
+                        <option value="tap">Tap Water</option>
+                        <option value="tanker">Water Tanker</option>
+                        <option value="river">River</option>
+                        <option value="pond">Pond</option>
+
+                    </select>
+
+                </div>
+
+
+
+                <button type="submit"
+                    class="btn-tech-glow w-full text-white font-black py-5 rounded-2xl uppercase tracking-widest text-[11px] flex items-center justify-center gap-3">
+
+                    <i class="fa-solid fa-vial-circle-check"></i>
+                    Run Safety Analysis
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+
+        <!-- RESULTS -->
+        <div class="lg:col-span-2 space-y-4">
+
+            <h4 class="font-black text-slate-800 uppercase text-xs tracking-widest mb-4 ml-2">
+                Recent Water Quality Checks
+            </h4>
+
+
+            {% for check in checks %}
+
+            <div class="bg-white p-7 rounded-[2rem] border border-blue-50 flex justify-between items-center shadow-sm">
+
+                <div>
+
+                    <h4 class="font-black text-slate-800 uppercase text-sm">
+                        {{ check.source_type }}
+                    </h4>
+
+                    <p class="text-[10px] font-black text-slate-400 uppercase">
+                        Area: {{ check.location_area }}
+                    </p>
+
+                    <span class="text-xs font-bold text-blue-600">
+                        Status: {{ check.safety_score }}
+                    </span>
+
+                </div>
+
+
+                <div class="max-w-sm text-right">
+
+                    <p class="text-[10px] font-black text-blue-600 uppercase">
+                        Advice
+                    </p>
+
+                    <p class="text-xs text-slate-600">
+                        {{ check.advice }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% empty %}
+
+            <div class="h-80 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-[3rem]">
+                <p class="text-[11px] font-black text-slate-400 uppercase">
+                    No safety checks yet
+                </p>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+    .btn-tech-glow {
+        background: linear-gradient(135deg, #003366, #0077be);
+        box-shadow: 0 10px 25px rgba(0, 51, 102, 0.15);
+    }
+</style>
+
+{% endblock %}

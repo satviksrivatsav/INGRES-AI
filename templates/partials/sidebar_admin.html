@@ -1,0 +1,65 @@
+{% load i18n %}
+
+<p class="nav-header-text text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] ml-4 mb-3 mt-6">
+    {% translate "Strategic Operations" %}
+</p>
+
+<a href="{% url 'portal:official_dashboard' %}" 
+   class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600 
+   {% if request.resolver_match.url_name == 'official_dashboard' %}nav-active{% endif %}">
+    <i class="fa-solid fa-microchip text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Intelligence Hub" %}</span>
+</a>
+
+<a href="/admin/portal/groundwaterdata/" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-database text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Dataset Manager" %}</span>
+</a>
+
+<p class="nav-header-text text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] ml-4 mb-3 mt-8">
+    {% translate "AI & Forecasting" %}
+</p>
+
+<a href="{% url 'chatbot:public_assistant' %}" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-robot text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Policy AI Buddy" %}</span>
+</a>
+
+<a href="{% url 'reports:trend_analysis' %}" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-chart-line text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Forecast Lab" %}</span>
+</a>
+
+<p class="nav-header-text text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] ml-4 mb-3 mt-8">
+    {% translate "Deep Analysis" %}
+</p>
+
+<a href="{% url 'portal:map_view' %}" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-layer-group text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Geospatial POC" %}</span>
+</a>
+
+<a href="{% url 'portal:conservation_advisor' %}" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-vial-circle-check text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Impact Analyzer" %}</span>
+</a>
+
+<p class="nav-header-text text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] ml-4 mb-3 mt-8">
+    {% translate "System Control" %}
+</p>
+
+<a href="/admin/chatbot/chatconversation/" 
+   class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-clipboard-list text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Node Audit Logs" %}</span>
+</a>
+
+<a href="/admin/accounts/user/" target="_blank" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-users-gear text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Access Control" %}</span>
+</a>
+
+<a href="{% url 'reports:export_csv' %}" class="nav-item flex items-center gap-3 p-4 rounded-2xl transition-all font-bold text-xs hover:bg-blue-50 text-slate-600">
+    <i class="fa-solid fa-file-export text-lg w-6 flex-shrink-0 text-center"></i> 
+    <span class="nav-text">{% translate "Bulk Data Export" %}</span>
+</a>

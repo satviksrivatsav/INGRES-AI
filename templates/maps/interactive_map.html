@@ -1,0 +1,124 @@
+{% extends 'base2.html' %}
+{% load i18n %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="h-full flex flex-col animate-in fade-in duration-700">
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div>
+            <h2 class="text-3xl font-extrabold text-slate-900">Geospatial <span class="text-blue-600">Intelligence</span></h2>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                Andhra Pradesh POC | Node Sync: Active
+            </p>
+        </div>
+
+        <div class="bg-white p-4 rounded-[2rem] border border-blue-100 shadow-sm flex items-center gap-6">
+            <label class="text-[10px] font-black text-blue-900 uppercase tracking-widest">Assessment Year</label>
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-bold text-slate-400">2020</span>
+                <input type="range" min="2019" max="2023" value="{{ selected_year }}" 
+                       class="w-48 h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                       onchange="location.href='?year=' + this.value">
+                <span class="text-xs font-black text-blue-600">{{ selected_year }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 bg-white rounded-[3rem] border border-blue-200 shadow-xl overflow-hidden relative group">
+        <div id="main-leaflet-map" class="w-full h-[600px] z-10"></div>
+        
+        <div class="absolute bottom-8 left-8 z-[1000] bg-white/90 backdrop-blur-md p-6 rounded-[2rem] border border-blue-100 shadow-2xl">
+            <h4 class="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4">Risk Legend</h4>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-[#22c55e]"></span>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase">Safe Zone</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-[#f59e0b]"></span>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase">Critical</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-[#ef4444]"></span>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase">Over-Exploited</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // center on AP: [15.9129, 79.7400]
+        var map = L.map('main-leaflet-map', { zoomControl: false }).setView([15.9129, 79.7400], 7);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: 'INGRES-AI Intelligence'
+        }).addTo(map);
+
+        var bounds = [];
+
+        {% for p in map_points %}
+            {% if p.latitude and p.longitude %}
+                var status = "{{ p.status_category }}";
+                var markerColor = "#22c55e"; // Safe default
+
+                if (status === "Semi-Critical") {
+                    markerColor = "#fbbf24";
+                } else if (status === "Critical") {
+                    markerColor = "#f97316";
+                } else if (status === "Over-Exploited") {
+                    markerColor = "#ef4444";
+                }
+
+                var marker = L.circleMarker([{{ p.latitude }}, {{ p.longitude }}], {
+                    radius: 12,
+                    fillColor: markerColor,
+                    color: "#ffffff",
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(map);
+
+                // FR-6.4: Detailed Popups
+                marker.bindPopup(`
+                    <div class="p-4 min-w-[200px]">
+                        <h4 class="text-blue-900 font-black uppercase text-xs mb-2 border-b pb-2">{{ p.district }}</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Year</span>
+                                <span class="text-[9px] font-black text-slate-700">{{ p.assessment_year }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Status</span>
+                                <span class="text-[9px] font-black" style="color: ${markerColor}">{{ p.status_category }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Annual Recharge</span>
+                                <span class="text-[9px] font-black text-slate-700">{{ p.recharge_value }} MCM</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Extraction</span>
+                                <span class="text-[9px] font-black text-slate-700">{{ p.extraction_percentage }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `);
+
+                bounds.push([{{ p.latitude }}, {{ p.longitude }}]);
+            {% endif %}
+        {% endfor %}
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    });
+</script>
+
+<style>
+    .leaflet-popup-content-wrapper { border-radius: 1.5rem; padding: 0; overflow: hidden; border: 1px solid #e2e8f0; }
+    .leaflet-popup-tip { display: none; }
+</style>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INGRES-AI | Your Groundwater Buddy</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --deep-ocean: #003366;
+            --tech-cyan: #00f2ff;
+            --water-blue: #0077be;
+            --surface-white: #ffffff;
+            --soft-accent: #f0f9ff;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--surface-white);
+            color: var(--deep-ocean);
+            scroll-behavior: smooth;
+        }
+
+        .heading-font { font-family: 'Outfit', sans-serif; }
+
+        /* Dynamic Liquid Background */
+        .liquid-bg {
+            background: radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 51, 102, 0.05) 0%, transparent 40%);
+        }
+
+        /* Glassmorphism Navbar */
+        .nav-blur {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 51, 102, 0.1);
+        }
+
+        /* Unique Bouncing Drop Icon */
+        @keyframes water-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(0.9); }
+        }
+        .bouncing-drop { animation: water-bounce 3s infinite ease-in-out; }
+
+        /* Tech-Glow Button */
+        .btn-tech-glow {
+            background: linear-gradient(135deg, var(--deep-ocean), var(--water-blue));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 51, 102, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-tech-glow:hover {
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Chat Widget Specialized */
+        .chat-container {
+            box-shadow: 0 10px 40px rgba(0, 51, 102, 0.15);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 24px 24px 4px 24px;
+        }
+
+        .bot-pulse {
+            box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.7);
+            animation: pulse-cyan 2s infinite;
+        }
+        @keyframes pulse-cyan {
+            70% { box-shadow: 0 0 0 15px rgba(0, 242, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
+        }
+    </style>
+</head>
+
+<body class="liquid-bg min-h-screen flex flex-col">
+    <div class="h-1.5 w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-900"></div>
+
+    <nav class="nav-blur sticky top-0 z-[1000] px-8 py-5">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="{% url 'landing' %}" class="flex items-center gap-3">
+                <div class="bouncing-drop w-11 h-11 bg-gradient-to-tr from-cyan-400 to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <i class="fa-solid fa-droplet text-xl"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="heading-font text-2xl font-extrabold tracking-tighter text-slate-900 leading-none">INGRES-<span class="text-cyan-500">AI</span></span>
+                    <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-600">Groundwater Intelligence</span>
+                </div>
+            </a>
+
+            <div class="hidden lg:flex items-center gap-10">
+                <div class="flex gap-8 text-sm font-bold text-slate-600 uppercase tracking-widest">
+                    <a href="{% url 'landing' %}" class="hover:text-cyan-500 transition-all">Home</a>
+                    <a href="#features" class="hover:text-cyan-500 transition-all">Abilities</a>
+                    <!-- <a href="#about" class="hover:text-cyan-500 transition-all">Mission</a> -->
+                    <a href="#contact" class="hover:text-cyan-500 transition-all">Team</a>
+                </div>
+                <div class="flex items-center gap-4 border-l pl-8 border-slate-200">
+                    <a href="{% url 'accounts:login' %}" class="text-sm font-extrabold text-blue-900 px-6 py-2">Sign In</a>
+                    <a href="{% url 'accounts:signup' %}" class="btn-tech-glow text-[11px] font-black uppercase tracking-widest px-7 py-3 rounded-full">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="chat-wrapper" class="fixed bottom-8 right-8 z-[1001]">
+        <button onclick="toggleChat()" class="bot-pulse w-18 h-18 w-16 h-16 btn-tech-glow rounded-full flex items-center justify-center border-4 border-white shadow-2xl hover:scale-110 transition-transform">
+            <i class="fa-solid fa-headset text-2xl"></i>
+        </button>
+
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-85 sm:w-96 h-[550px] bg-white chat-container flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500">
+            <div class="bg-gradient-to-r from-slate-900 to-blue-900 p-5 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30">
+                        <i class="fa-solid fa-robot text-cyan-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="heading-font text-sm font-bold">Water Buddy</h4>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                            <span class="text-[9px] font-black uppercase tracking-tighter text-cyan-300">Decision Support System</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="opacity-50 hover:opacity-100 transition-opacity"><i class="fa-solid fa-minus text-xl"></i></button>
+            </div>
+
+            <div id="chat-content" class="flex-1 p-5 overflow-y-auto space-y-5 bg-slate-50/50">
+                <div class="bg-white border border-slate-100 p-4 rounded-2xl rounded-tl-none text-xs leading-relaxed font-medium text-slate-700 shadow-sm max-w-[85%]">
+                    Greetings! I am the **INGRES-AI** Assistant. I can help you understand water status, farming safety, and government schemes [cite: 403-412].
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-slate-100">
+                <div class="flex gap-2 items-center bg-slate-100 rounded-2xl p-1.5">
+                    <input id="chat-input" type="text" placeholder="Ask about water safety..." 
+                           class="flex-1 text-xs px-4 bg-transparent outline-none font-bold text-slate-900" 
+                           onkeypress="if(event.key === 'Enter') sendMsg()">
+                    <button onclick="sendMsg()" class="w-11 h-11 btn-tech-glow rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-location-arrow text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.classList.toggle('hidden');
+            if (!win.classList.contains('hidden')) document.getElementById('chat-input').focus();
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('chat-input');
+            const content = document.getElementById('chat-content');
+            const val = input.value.trim();
+            if (!val) return;
+
+            // User Chat Bubble
+            content.innerHTML += `<div class="bg-blue-900 text-white p-4 rounded-2xl rounded-tr-none text-xs font-bold self-end max-w-[85%] ml-auto shadow-lg border-b-4 border-cyan-500">${val}</div>`;
+            input.value = "";
+            content.scrollTop = content.scrollHeight;
+
+            // Intelligence Thinking State
+            const tid = "t-" + Date.now();
+            content.innerHTML += `<div id="${tid}" class="flex gap-2 p-3 items-center">
+                <div class="text-[10px] font-black text-cyan-600 uppercase">Analyzing Data</div>
+                <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></div>
+                <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce delay-100"></div>
+            </div>`;
+            content.scrollTop = content.scrollHeight;
+
+            try {
+                const res = await fetch('/chatbot/query/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: JSON.stringify({ msg: val })
+                });
+                const data = await res.json();
+                document.getElementById(tid).remove();
+
+                // Assistant Response [cite: 151]
+                content.innerHTML += `
+                    <div class="bg-white border-l-4 border-cyan-500 p-4 rounded-2xl shadow-sm text-slate-800 max-w-[90%]">
+                        <div class="text-[8px] font-black text-blue-900 mb-2 border-b pb-1 flex justify-between">
+                            <span>GROUNDWATER INTEL</span>
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <div class="text-xs font-semibold leading-relaxed">${data.reply.replace(/\n/g, '<br>')}</div>
+                    </div>`;
+                content.scrollTop = content.scrollHeight;
+            } catch (e) {
+                document.getElementById(tid).innerHTML = "<span class='text-[10px] text-red-500 font-bold'>System Offline. Check Connection.</span>";
+            }
+        }
+    </script>
+</body>
+
+</html>

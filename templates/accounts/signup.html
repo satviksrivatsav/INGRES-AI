@@ -1,0 +1,96 @@
+{% extends 'base1.html' %}
+{% load i18n %}
+{% block title %}Create Account | INGRES-AI Groundwater Buddy{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center py-20 px-4 bg-slate-50/50">
+    <div class="max-w-md w-full space-y-8 bg-white/90 backdrop-blur-xl p-10 rounded-[2.5rem] border border-blue-100 shadow-[0_25px_60px_rgba(0,51,102,0.1)] relative overflow-hidden">
+        
+        <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-blue-100/40 rounded-full blur-3xl animate-pulse"></div>
+
+        <div class="text-center relative z-10">
+            <div class="w-20 h-20 bg-gradient-to-tr from-cyan-400 to-blue-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+                <i class="fa fa-user-plus text-3xl text-white"></i>
+            </div>
+            <h2 class="heading-font text-3xl font-extrabold text-slate-900 tracking-tight">
+                Join <span class="text-blue-600">INGRES-AI</span>
+            </h2>
+            <p class="mt-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                Initialize Your Intelligence Node
+            </p>
+        </div>
+
+        <form class="mt-8 space-y-5 relative z-10" method="POST">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <div class="relative group">
+                    <label class="text-[10px] font-black text-blue-900 uppercase tracking-widest ml-1 mb-2 block">Account Intelligence Level</label>
+                    <div class="relative">
+                        <i class="fa fa-users-gear absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors"></i>
+                        <select name="role" required class="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none font-bold text-slate-700 appearance-none transition-all cursor-pointer">
+                            <option value="public">General Public (Citizen / Farmer)</option>
+                            <option value="researcher">Research & Academic (Student / Scholar)</option>
+                            <option value="official">Technical Official (Govt / Researcher)</option>
+                        </select>
+                        <i class="fa fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <label class="text-[10px] font-black text-blue-900 uppercase tracking-widest ml-1 mb-2 block">Email Address</label>
+                    <div class="relative">
+                        <i class="fa fa-envelope-open absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors"></i>
+                        <input name="email" type="email" required placeholder="yourname@domain.com"
+                               class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none font-medium text-slate-700 placeholder-slate-300 transition-all">
+                    </div>
+                </div>
+                
+                <div class="relative group">
+                    <label class="text-[10px] font-black text-blue-900 uppercase tracking-widest ml-1 mb-2 block">Secure Password</label>
+                    <div class="relative">
+                        <i class="fa fa-shield-halved absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors"></i>
+                        <input name="password" type="password" required placeholder="Minimum 8 characters"
+                               class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none font-medium text-slate-700 placeholder-slate-300 transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 flex items-start gap-4">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                    <i class="fa fa-paper-plane text-blue-600 text-xs"></i>
+                </div>
+                <p class="text-[10px] text-blue-800 font-bold uppercase tracking-widest leading-relaxed">
+                    Account activation requires SMTP verification. A 6-digit OTP will be sent to your inbox.
+                </p>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest px-1">
+                <a href="{% url 'accounts:login' %}" class="text-slate-400 hover:text-blue-600 transition">Existing User?</a>
+                <span class="text-slate-300">|</span>
+                <a href="{% url 'landing' %}" class="text-slate-400 hover:text-blue-900">Return Home</a>
+            </div>
+
+            <button type="submit"
+                class="btn-tech-glow w-full text-white font-black py-5 rounded-2xl uppercase tracking-[0.25em] text-[11px] flex items-center justify-center gap-3 active:scale-95 transition-all">
+                <i class="fa fa-id-card"></i> Initialize Profile
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Specialized signup glow with Oceanic-Tech palette */
+    .btn-tech-glow {
+        background: linear-gradient(135deg, #003366, #0077be);
+        box-shadow: 0 10px 25px rgba(0, 51, 102, 0.15);
+    }
+    .btn-tech-glow:hover {
+        box-shadow: 0 15px 35px rgba(0, 242, 255, 0.4);
+    }
+    
+    /* Clean dropdown styling */
+    select {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

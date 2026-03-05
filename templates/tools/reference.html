@@ -1,0 +1,35 @@
+{% extends 'base2.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="animate-in fade-in duration-700">
+    <div class="mb-10">
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Technical <span class="text-blue-600">Glossary</span></h2>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Methodology & Status Definitions</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {% for item in definitions %}
+        <div class="bg-white p-8 rounded-[2.5rem] border border-blue-50 shadow-sm hover:shadow-md transition-all">
+            <div class="flex items-center gap-4 mb-4">
+                <span class="w-4 h-4 rounded-full bg-{{ item.color }}-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]"></span>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">{{ item.term }}</h3>
+            </div>
+            <p class="text-sm text-slate-600 font-medium leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                {{ item.desc }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-12 bg-blue-900 p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl">
+        <div class="relative z-10">
+            <h4 class="text-xs font-black uppercase tracking-[0.3em] text-cyan-400 mb-4">INGRES Methodology</h4>
+            <p class="text-sm text-blue-100 leading-relaxed max-w-2xl">
+                Our AI Node interprets data based on the GEC-2015 (Groundwater Estimation Committee) guidelines. All calculations for "Water Planner" and "RAG Chatbot" are constrained by these official national standards.
+            </p>
+        </div>
+        <i class="fa-solid fa-scale-balanced absolute right-[-20px] bottom-[-20px] text-8xl text-white/5"></i>
+    </div>
+</div>
+{% endblock %}

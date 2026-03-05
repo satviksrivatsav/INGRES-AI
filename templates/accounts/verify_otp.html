@@ -1,0 +1,58 @@
+{% extends 'base1.html' %}
+{% load i18n %}
+{% block title %}Verify Account | INGRES-AI{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center py-20 px-4 bg-slate-50/50">
+    <div class="max-w-md w-full bg-white/90 backdrop-blur-xl p-10 rounded-[2.5rem] border border-blue-100 shadow-[0_25px_60px_rgba(0,51,102,0.1)] text-center relative overflow-hidden">
+        
+        <div class="absolute -top-12 -right-12 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-60"></div>
+
+        <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg transform rotate-3">
+            <i class="fa fa-envelope-shield text-3xl text-white animate-pulse"></i>
+        </div>
+
+        <h2 class="heading-font text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">
+            Verify <span class="text-blue-600">Identity</span>
+        </h2>
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-12">
+            Enter the 6-digit code transmitted to your email 
+        </p>
+
+        <form method="POST" class="space-y-10 relative z-10">
+            {% csrf_token %}
+            <div class="relative group">
+                <input name="otp" maxlength="6" required placeholder="000000"
+                       class="w-full text-center text-5xl tracking-[0.4em] py-6 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none font-extrabold text-blue-900 placeholder-slate-200 transition-all shadow-inner">
+            </div>
+
+            <button type="submit" class="btn-tech-glow w-full text-white font-black py-5 rounded-2xl uppercase tracking-[0.3em] text-[11px] active:scale-95 transition-all flex items-center justify-center gap-3">
+                <i class="fa fa-circle-check"></i> Activate Account
+            </button>
+        </form>
+
+        <div class="mt-10 relative z-10">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Didn't receive the email? 
+                <a href="#" class="text-blue-600 hover:text-cyan-600 ml-1 transition-colors">Resend Code</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Oceanic-Tech Branding */
+    .btn-tech-glow {
+        background: linear-gradient(135deg, #003366, #0077be);
+        box-shadow: 0 10px 25px rgba(0, 51, 102, 0.15);
+    }
+    .btn-tech-glow:hover {
+        box-shadow: 0 15px 35px rgba(0, 242, 255, 0.4);
+    }
+    
+    /* Modern OTP Field Focus */
+    input[name="otp"]:focus::placeholder {
+        color: transparent;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base2.html' %}
+{% block content %}
+<div class="animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <div class="mb-10 flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Gov <span class="text-blue-600">Schemes</span></h2>
+            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Financial & Technical Support Directory</p>
+        </div>
+        <form method="GET" class="relative group">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search schemes..." 
+                   class="bg-white border border-blue-100 pl-12 pr-6 py-4 rounded-2xl outline-none focus:border-blue-400 transition-all shadow-sm w-80 font-bold text-xs">
+            <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for scheme in schemes %}
+        <div class="bg-white p-8 rounded-[2.5rem] border border-blue-50 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all group">
+            <span class="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[9px] font-black uppercase tracking-widest">{{ scheme.category }}</span>
+            <h3 class="text-lg font-black text-slate-800 mt-4 mb-3 leading-tight">{{ scheme.name }}</h3>
+            <p class="text-xs text-slate-500 font-semibold mb-6 line-clamp-3">{{ scheme.description }}</p>
+            <div class="border-t border-slate-50 pt-6 mt-auto">
+                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-3">Key Benefits</p>
+                <div class="text-[11px] font-bold text-slate-600 space-y-2">{{ scheme.benefits|linebreaks }}</div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center">
+            <i class="fa-solid fa-folder-open text-5xl text-slate-200 mb-4"></i>
+            <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">No matching schemes found for your region.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

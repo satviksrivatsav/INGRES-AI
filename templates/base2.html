@@ -1,0 +1,256 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}INGRES-AI | Command Center{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> 
+    <style>
+        :root {
+            --aqua-deep: #005B96;
+            --aqua-glow: #00D4FF;
+            --soft-white: #F8FAFC;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-white); overflow: hidden; }
+        .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-item i { width: 1.5rem; text-align: center; flex-shrink: 0; }
+        
+        /* Active Link Styling with Aqua Glow */
+        .nav-active { 
+            background: linear-gradient(135deg, var(--aqua-deep), #004a7c) !important; 
+            color: white !important; 
+            box-shadow: 0 10px 15px -3px rgba(0, 91, 150, 0.3); 
+        }
+
+        /* Sidebar Collapse Logic */
+        .sidebar-collapsed { width: 88px !important; }
+        .sidebar-collapsed .nav-text, 
+        .sidebar-collapsed .brand-text, 
+        .sidebar-collapsed .nav-header-text,
+        .sidebar-collapsed p[class*="tracking"] { display: none !important; }
+        .sidebar-collapsed .nav-item { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; margin: 4px 8px !important; }
+        .sidebar-collapsed .p-6 { justify-content: center !important; padding: 1.5rem 0 !important; }
+
+        /* Custom Scrollbar for Chat/Lists */
+        .chat-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .aqua-gradient-text {
+            background: linear-gradient(to right, var(--aqua-deep), var(--aqua-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <aside id="sidebar" class="w-72 bg-white border-r border-blue-50 h-screen flex flex-col sidebar-transition z-50 shrink-0 shadow-sm">
+        <div class="p-6 flex items-center gap-3 border-b border-blue-50 bg-blue-50/10">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
+                <i class="fa-solid fa-droplet text-xl"></i>
+            </div>
+            <div class="brand-text">
+                <h1 class="font-extrabold text-lg text-blue-900 leading-none tracking-tight uppercase">INGRES-<span class="text-cyan-500">AI</span></h1>
+                <p class="text-[8px] uppercase tracking-widest font-black text-slate-400 mt-1">Intelligence Node</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto chat-scroll">
+            <p class="nav-header-text text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] px-4 mb-2">Core Console</p>
+            
+            <a href="{% if user.role == 'official' %}{% url 'portal:official_dashboard' %}{% elif user.role == 'researcher' %}{% url 'portal:researcher_dashboard' %}{% else %}{% url 'portal:public_dashboard' %}{% endif %}" 
+               class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-house-chimney-window"></i>
+                <span class="nav-text">{% translate "Dashboard" %}</span>
+            </a>
+
+            {% if user.role == 'public' or user.role == 'researcher' %}
+            <a href="{% url 'portal:map_view' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span class="nav-text">{% translate "Intelligence Map" %}</span>
+            </a>
+            <a href="{% url 'chatbot:public_assistant' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-robot"></i>
+                <span class="nav-text">{% translate "AI Water Buddy" %}</span>
+            </a>
+            {% endif %}
+
+            {% if user.role == 'public' %}
+            <p class="nav-header-text text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] px-4 mt-6 mb-2">Decision Tools</p>
+            <a href="{% url 'portal:water_planner' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span class="nav-text">{% translate "Resource Planner" %}</span>
+            </a>
+            <a href="{% url 'portal:safety_checker' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-vial-circle-check"></i>
+                <span class="nav-text">{% translate "Safety Checker" %}</span>
+            </a>
+            {% endif %}
+
+            {% if user.role == 'researcher' or user.role == 'official' %}
+            <p class="nav-header-text text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] px-4 mt-6 mb-2">Analytical Hub</p>
+            <a href="{% url 'reports:trend_analysis' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-chart-line"></i>
+                <span class="nav-text">{% translate "Trend Reports" %}</span>
+            </a>
+            <a href="{% url 'schemes:directory' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span class="nav-text">{% translate "Policy Schemes" %}</span>
+            </a>
+            {% endif %}
+
+            {% if user.role == 'official' %}
+            <p class="nav-header-text text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] px-4 mt-6 mb-2">Governance</p>
+            <a href="/admin/" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-600 hover:bg-blue-50 transition-all font-bold text-xs">
+                <i class="fa-solid fa-server"></i>
+                <span class="nav-text">{% translate "Data Manager" %}</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="p-4 border-t border-blue-50 bg-slate-50/30">
+            <a href="{% url 'accounts:logout' %}" class="nav-item flex items-center gap-3 p-3.5 rounded-2xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-bold text-[10px] uppercase tracking-widest">
+                <i class="fa-solid fa-power-off"></i> 
+                <span class="nav-text">{% translate "Logout Node" %}</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-blue-50 flex items-center justify-between px-8 z-40">
+            <button onclick="toggleSidebar()" class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-blue-50 shadow-sm">
+                <i class="fa-solid fa-bars-staggered text-lg"></i>
+            </button>
+            
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none mb-1">
+                        {{ user.role|upper }} ACCESS
+                    </p>
+                    <p class="text-xs font-bold text-slate-800">{{ user.email }}</p>
+                </div>
+                <div class="relative">
+                    <img src="https://ui-avatars.com/api/?name={{ user.email }}&background=005B96&color=fff&bold=true" class="w-11 h-11 rounded-full border-2 border-white shadow-md" alt="Avatar">
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                </div>
+            </div>
+        </header>
+
+        <section class="flex-1 overflow-y-auto p-8 bg-slate-50/50 chat-scroll">
+            {% block content %}{% endblock %}
+        </section>
+        <div id="chat-wrapper" class="fixed bottom-8 right-8 z-[1001]">
+            <button onclick="toggleChat()" class="bot-pulse w-18 h-18 w-16 h-16 btn-tech-glow rounded-full flex items-center justify-center border-4 border-white shadow-2xl hover:scale-110 transition-transform">
+                <i class="fa-solid fa-headset text-2xl"></i>
+            </button>
+    
+            <div id="chat-window" class="hidden absolute bottom-20 right-0 w-85 sm:w-96 h-[550px] bg-white chat-container flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 duration-500">
+                <div class="bg-gradient-to-r from-slate-900 to-blue-900 p-5 text-white flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30">
+                            <i class="fa-solid fa-robot text-cyan-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="heading-font text-sm font-bold">Water Buddy</h4>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                <span class="text-[9px] font-black uppercase tracking-tighter text-cyan-300">Decision Support System</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="toggleChat()" class="opacity-50 hover:opacity-100 transition-opacity"><i class="fa-solid fa-minus text-xl"></i></button>
+                </div>
+    
+                <div id="chat-content" class="flex-1 p-5 overflow-y-auto space-y-5 bg-slate-50/50">
+                    <div class="bg-white border border-slate-100 p-4 rounded-2xl rounded-tl-none text-xs leading-relaxed font-medium text-slate-700 shadow-sm max-w-[85%]">
+                        Greetings! I am the **INGRES-AI** Assistant. I can help you understand water status, farming safety, and government schemes [cite: 403-412].
+                    </div>
+                </div>
+    
+                <div class="p-4 bg-white border-t border-slate-100">
+                    <div class="flex gap-2 items-center bg-slate-100 rounded-2xl p-1.5">
+                        <input id="chat-input" type="text" placeholder="Ask about water safety..." 
+                               class="flex-1 text-xs px-4 bg-transparent outline-none font-bold text-slate-900" 
+                               onkeypress="if(event.key === 'Enter') sendMsg()">
+                        <button onclick="sendMsg()" class="w-11 h-11 btn-tech-glow rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-location-arrow text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleChat() {
+                const win = document.getElementById('chat-window');
+                win.classList.toggle('hidden');
+                if (!win.classList.contains('hidden')) document.getElementById('chat-input').focus();
+            }
+    
+            async function sendMsg() {
+                const input = document.getElementById('chat-input');
+                const content = document.getElementById('chat-content');
+                const val = input.value.trim();
+                if (!val) return;
+    
+                // User Chat Bubble
+                content.innerHTML += `<div class="bg-blue-900 text-white p-4 rounded-2xl rounded-tr-none text-xs font-bold self-end max-w-[85%] ml-auto shadow-lg border-b-4 border-cyan-500">${val}</div>`;
+                input.value = "";
+                content.scrollTop = content.scrollHeight;
+    
+                // Intelligence Thinking State
+                const tid = "t-" + Date.now();
+                content.innerHTML += `<div id="${tid}" class="flex gap-2 p-3 items-center">
+                    <div class="text-[10px] font-black text-cyan-600 uppercase">Analyzing Data</div>
+                    <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></div>
+                    <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce delay-100"></div>
+                </div>`;
+                content.scrollTop = content.scrollHeight;
+    
+                try {
+                    const res = await fetch('/chatbot/query/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                        body: JSON.stringify({ msg: val })
+                    });
+                    const data = await res.json();
+                    document.getElementById(tid).remove();
+    
+                    // Assistant Response [cite: 151]
+                    content.innerHTML += `
+                        <div class="bg-white border-l-4 border-cyan-500 p-4 rounded-2xl shadow-sm text-slate-800 max-w-[90%]">
+                            <div class="text-[8px] font-black text-blue-900 mb-2 border-b pb-1 flex justify-between">
+                                <span>GROUNDWATER INTEL</span>
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <div class="text-xs font-semibold leading-relaxed">${data.reply.replace(/\n/g, '<br>')}</div>
+                        </div>`;
+                    content.scrollTop = content.scrollHeight;
+                } catch (e) {
+                    document.getElementById(tid).innerHTML = "<span class='text-[10px] text-red-500 font-bold'>System Offline. Check Connection.</span>";
+                }
+            }
+            
+        function toggleSidebar() { 
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('sidebar-collapsed');
+        }
+        
+        // Auto-Active Link Highlighter
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-item').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('nav-active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
