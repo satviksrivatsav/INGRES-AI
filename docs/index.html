@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INGRES-AI – Groundwater Resource Intelligence &amp; Management System</title>
+  <meta name="description" content="INGRES-AI is an AI-powered groundwater resource intelligence and management platform for India, combining geospatial analysis, ML predictions, and an AI chatbot for water resource management." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Reset & Variables ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-dark:   #0a1628;
+      --blue-mid:    #0d2244;
+      --blue:        #1a4a8a;
+      --blue-light:  #2563eb;
+      --accent:      #06b6d4;
+      --accent2:     #10b981;
+      --accent3:     #f59e0b;
+      --accent4:     #8b5cf6;
+      --text:        #e2e8f0;
+      --text-muted:  #94a3b8;
+      --card-bg:     rgba(255,255,255,0.05);
+      --card-border: rgba(255,255,255,0.10);
+      --radius:      12px;
+      --shadow:      0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--blue-dark);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ─── Typography ────────────────────────────────────────────────────────── */
+    h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; }
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    p  { color: var(--text-muted); }
+    a  { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'Fira Code', monospace; font-size: 0.88em; }
+
+    /* ─── Layout helpers ────────────────────────────────────────────────────── */
+    .container  { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+    .section    { padding: 80px 0; }
+    .section-alt { background: rgba(255,255,255,0.02); }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .flex-col    { display: flex; flex-direction: column; }
+    .gap-sm      { gap: 8px; }
+    .gap-md      { gap: 16px; }
+    .gap-lg      { gap: 32px; }
+    .text-center { text-align: center; }
+    .mt-sm  { margin-top: 8px; }
+    .mt-md  { margin-top: 16px; }
+    .mt-lg  { margin-top: 32px; }
+    .mt-xl  { margin-top: 48px; }
+    .mb-sm  { margin-bottom: 8px; }
+    .mb-md  { margin-bottom: 16px; }
+    .mb-lg  { margin-bottom: 32px; }
+
+    /* ─── Cards ─────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+    /* ─── Badges / Tags ──────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-blue   { background: rgba(37,99,235,0.2);  color: #93c5fd; }
+    .badge-cyan   { background: rgba(6,182,212,0.2);  color: #67e8f9; }
+    .badge-green  { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .badge-amber  { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .badge-purple { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+    .badge-rose   { background: rgba(244,63,94,0.2);  color: #fda4af; }
+
+    /* ─── Section Labels ─────────────────────────────────────────────────────── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* ─── Navigation ─────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,22,40,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-logo .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--blue-light), var(--accent));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    @media (max-width: 700px) { .nav-links { display: none; } }
+
+    /* ─── Hero ──────────────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 92vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 60px 0;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 60% 40%, rgba(37,99,235,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(6,182,212,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      position: relative;
+    }
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .hero-visual { display: none; }
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(6,182,212,0.12);
+      border: 1px solid rgba(6,182,212,0.25);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+    .hero h1 { color: #f1f5f9; margin-bottom: 20px; }
+    .hero h1 .highlight {
+      background: linear-gradient(90deg, var(--blue-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 32px; max-width: 520px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--blue-light);
+      color: #fff;
+      border: none;
+    }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); text-decoration: none; color: #fff; }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Hero Visual (Animated Architecture Sketch) */
+    .hero-visual {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.6;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-visual pre {
+      color: var(--text-muted);
+      white-space: pre;
+      font-size: 0.76rem;
+    }
+    .hero-visual .hl-blue   { color: #93c5fd; }
+    .hero-visual .hl-cyan   { color: #67e8f9; }
+    .hero-visual .hl-green  { color: #6ee7b7; }
+    .hero-visual .hl-amber  { color: #fcd34d; }
+    .hero-visual .hl-purple { color: #c4b5fd; }
+
+    /* ─── Stats Bar ─────────────────────────────────────────────────────────── */
+    .stats-bar {
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--card-border);
+      padding: 32px 0;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0;
+      text-align: center;
+    }
+    .stat-item {
+      padding: 8px 16px;
+      border-right: 1px solid var(--card-border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-number { font-size: 2rem; font-weight: 800; color: var(--accent); display: block; }
+    .stat-label  { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ─── Architecture Diagram ──────────────────────────────────────────────── */
+    .arch-diagram {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      overflow-x: auto;
+    }
+    .arch-diagram svg { max-width: 100%; height: auto; }
+
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .arch-layer {
+      border-radius: 10px;
+      padding: 16px 20px;
+      border: 1px solid;
+    }
+    .arch-layer-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+    .arch-layer-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .arch-box {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Layers */
+    .layer-ui       { background: rgba(37,99,235,0.08);  border-color: rgba(37,99,235,0.25);  }
+    .layer-ui .arch-layer-title     { color: #93c5fd; }
+    .layer-ui .arch-box             { background: rgba(37,99,235,0.15); color: #93c5fd; }
+
+    .layer-apps     { background: rgba(6,182,212,0.06);  border-color: rgba(6,182,212,0.22);  }
+    .layer-apps .arch-layer-title   { color: #67e8f9; }
+    .layer-apps .arch-box           { background: rgba(6,182,212,0.12); color: #67e8f9; }
+
+    .layer-ml       { background: rgba(139,92,246,0.07); border-color: rgba(139,92,246,0.22); }
+    .layer-ml .arch-layer-title     { color: #c4b5fd; }
+    .layer-ml .arch-box             { background: rgba(139,92,246,0.14); color: #c4b5fd; }
+
+    .layer-db       { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.22); }
+    .layer-db .arch-layer-title     { color: #6ee7b7; }
+    .layer-db .arch-box             { background: rgba(16,185,129,0.14); color: #6ee7b7; }
+
+    .layer-ext      { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.22); }
+    .layer-ext .arch-layer-title    { color: #fcd34d; }
+    .layer-ext .arch-box            { background: rgba(245,158,11,0.14); color: #fcd34d; }
+
+    .arch-arrow {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    /* ─── Workflow Steps ─────────────────────────────────────────────────────── */
+    .workflow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      position: relative;
+    }
+    .workflow-step {
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+      position: relative;
+      padding: 20px 16px;
+    }
+    .workflow-step::after {
+      content: '→';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      z-index: 1;
+    }
+    .workflow-step:last-child::after { display: none; }
+    .step-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin: 0 auto 10px;
+    }
+    .step-title { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .step-desc  { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ─── Tech Stack ─────────────────────────────────────────────────────────── */
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+    }
+    .tech-icon {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .tech-name  { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+    .tech-desc  { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ─── Module Cards ───────────────────────────────────────────────────────── */
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .module-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .module-icon {
+      width: 48px; height: 48px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 14px;
+    }
+    .module-card ul {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .module-card ul li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      padding: 3px 0;
+    }
+    .module-card ul li::before {
+      content: '• ';
+      color: var(--accent);
+    }
+
+    /* ─── Feature Rows ───────────────────────────────────────────────────────── */
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (max-width: 760px) { .feature-row { grid-template-columns: 1fr; } }
+    .feature-row.reverse .feature-visual { order: -1; }
+    @media (max-width: 760px) { .feature-row.reverse .feature-visual { order: 0; } }
+    .feature-visual {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 28px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+    .feature-list { list-style: none; margin-top: 16px; }
+    .feature-list li {
+      padding: 8px 0;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .feature-list li:last-child { border-bottom: none; }
+    .feature-list .check {
+      color: var(--accent2);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ─── Data Models ────────────────────────────────────────────────────────── */
+    .model-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .model-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .model-fields {
+      list-style: none;
+      padding: 12px 18px;
+    }
+    .model-fields li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      font-size: 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .model-fields li:last-child { border-bottom: none; }
+    .field-name  { color: var(--text); font-family: 'Fira Code', monospace; }
+    .field-type  { color: var(--text-muted); font-size: 0.72rem; font-family: 'Fira Code', monospace; }
+
+    /* ─── Setup Steps ────────────────────────────────────────────────────────── */
+    .setup-step {
+      display: flex;
+      gap: 20px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .setup-step:last-child { border-bottom: none; }
+    .setup-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(37,99,235,0.2);
+      border: 1px solid rgba(37,99,235,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #93c5fd;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .setup-content h4 { font-size: 0.95rem; margin-bottom: 6px; }
+    .setup-content p  { font-size: 0.85rem; }
+    .code-block {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #6ee7b7;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    /* ─── Role Cards ─────────────────────────────────────────────────────────── */
+    .role-card {
+      border-radius: var(--radius);
+      padding: 28px;
+      border: 1px solid;
+    }
+    .role-card.public   { background: rgba(37,99,235,0.07);  border-color: rgba(37,99,235,0.25);  }
+    .role-card.researcher { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.25); }
+    .role-card.official { background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.25); }
+    .role-icon { font-size: 2rem; margin-bottom: 12px; }
+    .role-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .role-list  { list-style: none; margin-top: 12px; }
+    .role-list li {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      padding: 4px 0;
+    }
+    .role-list li::before { content: '→ '; }
+
+    /* ─── Footer ─────────────────────────────────────────────────────────────── */
+    footer {
+      background: var(--blue-mid);
+      border-top: 1px solid var(--card-border);
+      padding: 48px 0 28px;
+      text-align: center;
+    }
+    footer p { color: var(--text-muted); font-size: 0.85rem; }
+    .footer-logo { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .footer-logo span { color: var(--accent); }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin: 16px 0;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+    .footer-links a { color: var(--text-muted); font-size: 0.85rem; }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ─── Scroll Reveal (simple fade-in via CSS animation) ──────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { animation: fadeUp 0.6s ease both; }
+    .reveal-d1 { animation-delay: 0.1s; }
+    .reveal-d2 { animation-delay: 0.2s; }
+    .reveal-d3 { animation-delay: 0.3s; }
+
+    /* ─── Responsive tweaks ──────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .section { padding: 56px 0; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-item:nth-child(even) { border-right: none; }
+      .stat-item:nth-child(odd):nth-last-child(1) { border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="logo-icon">💧</div>
+      <span>INGRES<span>-AI</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#techstack">Tech Stack</a></li>
+      <li><a href="#modules">Modules</a></li>
+      <li><a href="#workflows">Workflows</a></li>
+      <li><a href="#datamodel">Data Model</a></li>
+      <li><a href="#roles">Roles</a></li>
+      <li><a href="#setup">Setup</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════════════════ -->
+<section class="hero" id="overview">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <!-- Left -->
+      <div>
+        <div class="hero-eyebrow reveal">🌊 Final Year Project · AI &amp; Geospatial Intelligence</div>
+        <h1 class="reveal reveal-d1">
+          Groundwater Resource<br/>
+          <span class="highlight">Intelligence &amp; Management</span>
+        </h1>
+        <p class="hero-desc reveal reveal-d2">
+          INGRES-AI is an AI-powered platform that combines geospatial analysis,
+          machine learning predictions, and an intelligent chatbot to monitor,
+          conserve, and manage groundwater resources across India.
+        </p>
+        <div class="hero-actions reveal reveal-d3">
+          <a href="#architecture" class="btn btn-primary">Explore Architecture →</a>
+          <a href="https://github.com/satviksrivatsav/INGRES-AI" class="btn btn-outline" target="_blank">GitHub Repo ↗</a>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;" class="reveal reveal-d3">
+          <span class="badge badge-blue">Django 5.2</span>
+          <span class="badge badge-cyan">Google Gemini AI</span>
+          <span class="badge badge-green">Scikit-learn</span>
+          <span class="badge badge-amber">Leaflet Maps</span>
+          <span class="badge badge-purple">Bootstrap 5</span>
+          <span class="badge badge-rose">Multi-role</span>
+        </div>
+      </div>
+
+      <!-- Right – ASCII architecture sketch -->
+      <div class="hero-visual reveal reveal-d2">
+<pre>
+<span class="hl-blue">┌─────────────────────────────────────────────┐
+│           INGRES-AI Web Application         │
+├──────────┬────────────┬──────────┬──────────┤</span>
+<span class="hl-cyan">│ Accounts │   Portal   │ Chatbot  │  Reports │
+│  Auth &amp;  │ Dashboards │  Gemini  │  Trends  │
+│  Roles   │  ML Views  │   RAG    │   CSV    │</span>
+<span class="hl-blue">├──────────┴──┬─────────┴──────────┴──────────┤
+│             │  Maps · Schemes · Tools       │
+├─────────────┴────────────────────────────────┤</span>
+<span class="hl-purple">│    ML Models (Scikit-learn .pkl)             │
+│  ├─ Resource Planner  ├─ Safety Checker     │</span>
+<span class="hl-blue">├─────────────────────────────────────────────┤</span>
+<span class="hl-green">│           Database (SQLite3 / PostgreSQL)    │
+│  GroundwaterData · UserProfile · Reports    │</span>
+<span class="hl-blue">├─────────────────────────────────────────────┤</span>
+<span class="hl-amber">│      External Services                       │
+│  ├─ Google Gemini AI   (chatbot LLM)        │
+│  └─ OSM Nominatim      (geocoding API)      │
+└─────────────────────────────────────────────┘</span>
+</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STATS BAR
+══════════════════════════════════════════════════════════════════ -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-number">7</span>
+        <span class="stat-label">Django Apps</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">12</span>
+        <span class="stat-label">Data Models</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">40+</span>
+        <span class="stat-label">HTML Templates</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">6</span>
+        <span class="stat-label">ML Artefacts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">3</span>
+        <span class="stat-label">User Roles</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">3</span>
+        <span class="stat-label">Languages (i18n)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">13</span>
+        <span class="stat-label">Districts Seeded</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">23+</span>
+        <span class="stat-label">URL Routes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ARCHITECTURE
+══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="architecture">
+  <div class="container">
+    <div class="section-label">System Design</div>
+    <h2>Architecture Overview</h2>
+    <p class="mb-lg">A layered, modular Django application with clearly separated concerns — from user-facing templates down to external API integrations.</p>
+
+    <div class="arch-diagram">
+      <div class="arch-layers">
+
+        <!-- Presentation Layer -->
+        <div class="arch-layer layer-ui">
+          <div class="arch-layer-title">🖥️ Presentation Layer — Django Templates (HTML/CSS/Bootstrap 5)</div>
+          <div class="arch-layer-items">
+            <div class="arch-box">🏠 Landing Page</div>
+            <div class="arch-box">📊 Public Dashboard</div>
+            <div class="arch-box">🔬 Researcher Dashboard</div>
+            <div class="arch-box">🏛️ Official Dashboard</div>
+            <div class="arch-box">🤖 AI Chatbot UI</div>
+            <div class="arch-box">🗺️ Interactive Map</div>
+            <div class="arch-box">📑 Reports</div>
+            <div class="arch-box">📋 Schemes Directory</div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇️</div>
+
+        <!-- Application Layer -->
+        <div class="arch-layer layer-apps">
+          <div class="arch-layer-title">⚙️ Application Layer — Django Views &amp; URL Routing</div>
+          <div class="arch-layer-items">
+            <div class="arch-box">👤 accounts</div>
+            <div class="arch-box">🌊 portal</div>
+            <div class="arch-box">💬 chatbot</div>
+            <div class="arch-box">🗺️ maps</div>
+            <div class="arch-box">📊 reports</div>
+            <div class="arch-box">📋 schemes</div>
+            <div class="arch-box">🔧 tools</div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇️</div>
+
+        <!-- ML / Intelligence Layer -->
+        <div class="arch-layer layer-ml">
+          <div class="arch-layer-title">🤖 Intelligence Layer — ML Models &amp; AI Integration</div>
+          <div class="arch-layer-items">
+            <div class="arch-box">💧 Resource Planner Model (.pkl)</div>
+            <div class="arch-box">🔬 Safety Checker Model (.pkl)</div>
+            <div class="arch-box">🧠 Gemini AI (RAG Chatbot)</div>
+            <div class="arch-box">📐 Feature Encoders</div>
+            <div class="arch-box">🎯 Target Transformers</div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇️</div>
+
+        <!-- Data Layer -->
+        <div class="arch-layer layer-db">
+          <div class="arch-layer-title">🗄️ Data Layer — SQLite3 / PostgreSQL via Django ORM</div>
+          <div class="arch-layer-items">
+            <div class="arch-box">🌍 GroundwaterData</div>
+            <div class="arch-box">👤 User &amp; UserProfile</div>
+            <div class="arch-box">📩 EmailOTP</div>
+            <div class="arch-box">🔔 Notification</div>
+            <div class="arch-box">💬 ChatConversation</div>
+            <div class="arch-box">📊 GroundwaterReport</div>
+            <div class="arch-box">📋 WaterScheme</div>
+            <div class="arch-box">💧 WaterPlan</div>
+            <div class="arch-box">🔬 SafetyCheck</div>
+            <div class="arch-box">📍 MapMarker</div>
+          </div>
+        </div>
+
+        <div class="arch-arrow">⬇️</div>
+
+        <!-- External Services -->
+        <div class="arch-layer layer-ext">
+          <div class="arch-layer-title">🌐 External Services</div>
+          <div class="arch-layer-items">
+            <div class="arch-box">🤖 Google Gemini AI API</div>
+            <div class="arch-box">🗺️ OpenStreetMap Nominatim (geocoding)</div>
+            <div class="arch-box">📧 Gmail SMTP (email OTP)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Horizontal flow diagram -->
+    <h3 class="mt-xl mb-md" style="color:var(--text-muted);font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;">Request / Response Flow</h3>
+    <div class="card">
+      <div style="display:flex;gap:0;flex-wrap:wrap;">
+        <div style="flex:1;min-width:130px;text-align:center;padding:16px 10px;border-right:1px solid var(--card-border);">
+          <div style="font-size:1.6rem;">🌐</div>
+          <div style="font-size:.8rem;font-weight:600;margin-top:6px;">Browser</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">User request</div>
+        </div>
+        <div style="flex:1;min-width:130px;text-align:center;padding:16px 10px;border-right:1px solid var(--card-border);">
+          <div style="font-size:1.6rem;">🔀</div>
+          <div style="font-size:.8rem;font-weight:600;margin-top:6px;">URL Router</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">core/urls.py</div>
+        </div>
+        <div style="flex:1;min-width:130px;text-align:center;padding:16px 10px;border-right:1px solid var(--card-border);">
+          <div style="font-size:1.6rem;">🔐</div>
+          <div style="font-size:.8rem;font-weight:600;margin-top:6px;">Auth Middleware</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">Session &amp; role check</div>
+        </div>
+        <div style="flex:1;min-width:130px;text-align:center;padding:16px 10px;border-right:1px solid var(--card-border);">
+          <div style="font-size:1.6rem;">⚙️</div>
+          <div style="font-size:.8rem;font-weight:600;margin-top:6px;">View Function</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">Business logic</div>
+        </div>
+        <div style="flex:1;min-width:130px;text-align:center;padding:16px 10px;border-right:1px solid var(--card-border);">
+          <div style="font-size:1.6rem;">🗄️</div>
+          <div style="font-size:.8rem;font-weight:600;margin-top:6px;">ORM / DB</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">Query &amp; persist</div>
+        </div>
+        <div style="flex:1;min-width:130px;text-align:center;padding:16px 10px;">
+          <div style="font-size:1.6rem;">🖼️</div>
+          <div style="font-size:.8rem;font-weight:600;margin-top:6px;">Template</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">HTML response</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TECH STACK
+══════════════════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="techstack">
+  <div class="container">
+    <div class="section-label">Technologies</div>
+    <h2>Tech Stack</h2>
+    <p class="mb-lg">A carefully chosen set of battle-tested frameworks and libraries covering every layer of the platform.</p>
+
+    <div class="grid-3">
+
+      <!-- Backend -->
+      <div>
+        <h3 class="mb-md" style="color:var(--accent);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;">Backend</h3>
+        <div class="flex-col gap-sm">
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(6,182,212,.15);">🐍</div>
+            <div>
+              <div class="tech-name">Django 5.2</div>
+              <div class="tech-desc">Web framework, ORM, Auth, i18n</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(6,182,212,.15);">⚡</div>
+            <div>
+              <div class="tech-name">ASGI / WSGI</div>
+              <div class="tech-desc">asgiref 3.11 — async-ready server</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(6,182,212,.15);">🖼️</div>
+            <div>
+              <div class="tech-name">Pillow 10.4</div>
+              <div class="tech-desc">Image processing for uploads</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(6,182,212,.15);">📄</div>
+            <div>
+              <div class="tech-name">ReportLab 4.4</div>
+              <div class="tech-desc">PDF report generation</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(6,182,212,.15);">🌐</div>
+            <div>
+              <div class="tech-name">Requests 2.32</div>
+              <div class="tech-desc">HTTP calls to external APIs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI / ML -->
+      <div>
+        <h3 class="mb-md" style="color:var(--accent4);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;">AI &amp; Machine Learning</h3>
+        <div class="flex-col gap-sm">
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(139,92,246,.15);">🤖</div>
+            <div>
+              <div class="tech-name">Google Gemini SDK</div>
+              <div class="tech-desc">google-genai 1.6.1 — LLM chatbot</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(139,92,246,.15);">📊</div>
+            <div>
+              <div class="tech-name">Scikit-learn</div>
+              <div class="tech-desc">ML model training &amp; inference</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(139,92,246,.15);">💾</div>
+            <div>
+              <div class="tech-name">Joblib</div>
+              <div class="tech-desc">.pkl model serialisation</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(139,92,246,.15);">📓</div>
+            <div>
+              <div class="tech-name">Jupyter / Colab</div>
+              <div class="tech-desc">WATER.ipynb for model training</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(139,92,246,.15);">🗺️</div>
+            <div>
+              <div class="tech-name">OSM Nominatim</div>
+              <div class="tech-desc">Auto-geocoding (lat/lon lookup)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frontend -->
+      <div>
+        <h3 class="mb-md" style="color:var(--accent2);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;">Frontend</h3>
+        <div class="flex-col gap-sm">
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(16,185,129,.15);">💠</div>
+            <div>
+              <div class="tech-name">Bootstrap 5</div>
+              <div class="tech-desc">Responsive UI components</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(16,185,129,.15);">📝</div>
+            <div>
+              <div class="tech-name">Django Crispy Forms</div>
+              <div class="tech-desc">crispy-bootstrap5 — styled forms</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(16,185,129,.15);">🗺️</div>
+            <div>
+              <div class="tech-name">Leaflet.js</div>
+              <div class="tech-desc">Interactive geospatial maps</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(16,185,129,.15);">🔠</div>
+            <div>
+              <div class="tech-name">Django Templates</div>
+              <div class="tech-desc">40+ HTML template files</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(16,185,129,.15);">🌍</div>
+            <div>
+              <div class="tech-name">Django i18n</div>
+              <div class="tech-desc">English, Hindi, Telugu support</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Database + DevOps row -->
+    <div class="grid-2 mt-lg">
+      <div>
+        <h3 class="mb-md" style="color:var(--accent3);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;">Database &amp; Storage</h3>
+        <div class="flex-col gap-sm">
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(245,158,11,.15);">🗄️</div>
+            <div>
+              <div class="tech-name">SQLite3 (default)</div>
+              <div class="tech-desc">Zero-config local development DB</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(245,158,11,.15);">🐘</div>
+            <div>
+              <div class="tech-name">PostgreSQL (production)</div>
+              <div class="tech-desc">Django ORM database-agnostic</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 class="mb-md" style="color:var(--text-muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;">DevOps &amp; Config</h3>
+        <div class="flex-col gap-sm">
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(100,116,139,.15);">🔐</div>
+            <div>
+              <div class="tech-name">python-dotenv 1.2</div>
+              <div class="tech-desc">.env file for secrets management</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon" style="background:rgba(100,116,139,.15);">📧</div>
+            <div>
+              <div class="tech-name">Gmail SMTP</div>
+              <div class="tech-desc">OTP email authentication</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MODULES
+══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="modules">
+  <div class="container">
+    <div class="section-label">Application Modules</div>
+    <h2>Django App Modules</h2>
+    <p class="mb-lg">The project is divided into 7 focused Django apps, each owning its models, views, URLs, and templates.</p>
+
+    <div class="grid-3">
+
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(37,99,235,.15);">👤</div>
+        <span class="badge badge-blue mb-sm">accounts</span>
+        <h3>Authentication &amp; Roles</h3>
+        <p style="font-size:.83rem;">Custom email-based User model with three distinct roles and OTP verification.</p>
+        <ul>
+          <li>Email OTP sign-up / login</li>
+          <li>Role: Public / Researcher / Official</li>
+          <li>UserProfile (state + district)</li>
+          <li>Notification system</li>
+          <li>Profile photo upload</li>
+        </ul>
+      </div>
+
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(6,182,212,.15);">🌊</div>
+        <span class="badge badge-cyan mb-sm">portal</span>
+        <h3>Core Intelligence Hub</h3>
+        <p style="font-size:.83rem;">Central dashboards with ML-powered water planning and safety checking tools.</p>
+        <ul>
+          <li>Three role-specific dashboards</li>
+          <li>Water Resource Planner (ML)</li>
+          <li>Water Safety Checker (ML)</li>
+          <li>GroundwaterData management</li>
+          <li>Admin analytics &amp; bulk upload</li>
+        </ul>
+      </div>
+
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(139,92,246,.15);">🤖</div>
+        <span class="badge badge-purple mb-sm">chatbot</span>
+        <h3>AI Water Buddy</h3>
+        <p style="font-size:.83rem;">RAG-powered chatbot using Google Gemini that grounds responses in real district data.</p>
+        <ul>
+          <li>Retrieval-Augmented Generation</li>
+          <li>District &amp; year detection</li>
+          <li>Gemini AI explanation layer</li>
+          <li>ChatConversation logging</li>
+          <li>No hallucination by design</li>
+        </ul>
+      </div>
+
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(16,185,129,.15);">🗺️</div>
+        <span class="badge badge-green mb-sm">maps</span>
+        <h3>Geographic Visualization</h3>
+        <p style="font-size:.83rem;">Leaflet-powered interactive maps showing groundwater data by state and year.</p>
+        <ul>
+          <li>Leaflet.js map rendering</li>
+          <li>Year &amp; state filter controls</li>
+          <li>Auto-geocoding via Nominatim</li>
+          <li>MapMarker coordinate cache</li>
+          <li>Andhra Pradesh focus region</li>
+        </ul>
+      </div>
+
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(245,158,11,.15);">📊</div>
+        <span class="badge badge-amber mb-sm">reports</span>
+        <h3>Trend Analysis &amp; Reports</h3>
+        <p style="font-size:.83rem;">Multi-year groundwater trend reports with snapshot storage and CSV export.</p>
+        <ul>
+          <li>Multi-year district trends</li>
+          <li>JSON chart payloads</li>
+          <li>GroundwaterReport snapshots</li>
+          <li>CSV export for researchers</li>
+          <li>Audit trail history</li>
+        </ul>
+      </div>
+
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(244,63,94,.15);">📋</div>
+        <span class="badge badge-rose mb-sm">schemes</span>
+        <h3>Government Schemes</h3>
+        <p style="font-size:.83rem;">Searchable directory of government water conservation schemes and programs.</p>
+        <ul>
+          <li>Searchable scheme directory</li>
+          <li>Filter by state &amp; category</li>
+          <li>WaterScheme data model</li>
+          <li>Seed data via seed_schemes.py</li>
+        </ul>
+      </div>
+
+      <div class="module-card" style="grid-column: span 1;">
+        <div class="module-icon" style="background:rgba(100,116,139,.15);">🔧</div>
+        <span class="badge" style="background:rgba(100,116,139,.2);color:#94a3b8;" class="mb-sm">tools</span>
+        <h3>Technical Reference</h3>
+        <p style="font-size:.83rem;">Technical documentation and reference utilities for researchers and officials.</p>
+        <ul>
+          <li>Reference documentation pages</li>
+          <li>No database models</li>
+          <li>Static informational content</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     WORKFLOWS
+══════════════════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="workflows">
+  <div class="container">
+    <div class="section-label">Data Flows</div>
+    <h2>Core Workflows</h2>
+    <p class="mb-lg">End-to-end data flows for each major feature in the platform.</p>
+
+    <!-- Auth Flow -->
+    <div class="card mb-lg">
+      <h3 class="mb-md">🔐 User Authentication Flow</h3>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(37,99,235,.2);color:#93c5fd;">1</div>
+          <div class="step-title">Register</div>
+          <div class="step-desc">Email + password + role selection</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(37,99,235,.2);color:#93c5fd;">2</div>
+          <div class="step-title">OTP Sent</div>
+          <div class="step-desc">6-digit code via Gmail SMTP</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(37,99,235,.2);color:#93c5fd;">3</div>
+          <div class="step-title">Verify OTP</div>
+          <div class="step-desc">EmailOTP model validated</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(37,99,235,.2);color:#93c5fd;">4</div>
+          <div class="step-title">Profile Setup</div>
+          <div class="step-desc">State + district selection</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(37,99,235,.2);color:#93c5fd;">5</div>
+          <div class="step-title">Role Dashboard</div>
+          <div class="step-desc">Public / Researcher / Official</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Chatbot Flow -->
+    <div class="card mb-lg">
+      <h3 class="mb-md">🤖 AI Chatbot (RAG) Flow</h3>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(139,92,246,.2);color:#c4b5fd;">1</div>
+          <div class="step-title">User Query</div>
+          <div class="step-desc">Natural language question</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(139,92,246,.2);color:#c4b5fd;">2</div>
+          <div class="step-title">Parse Intent</div>
+          <div class="step-desc">Extract district + year</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(139,92,246,.2);color:#c4b5fd;">3</div>
+          <div class="step-title">Retrieve Data</div>
+          <div class="step-desc">Query GroundwaterData ORM</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(139,92,246,.2);color:#c4b5fd;">4</div>
+          <div class="step-title">Gemini LLM</div>
+          <div class="step-desc">AI explains grounded facts</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(139,92,246,.2);color:#c4b5fd;">5</div>
+          <div class="step-title">Log &amp; Respond</div>
+          <div class="step-desc">ChatConversation saved</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Water Planner Flow -->
+    <div class="card mb-lg">
+      <h3 class="mb-md">💧 Water Resource Planner Flow</h3>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(6,182,212,.2);color:#67e8f9;">1</div>
+          <div class="step-title">User Input</div>
+          <div class="step-desc">Land size, crop, season</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(6,182,212,.2);color:#67e8f9;">2</div>
+          <div class="step-title">Feature Encode</div>
+          <div class="step-desc">Categorical → numeric</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(6,182,212,.2);color:#67e8f9;">3</div>
+          <div class="step-title">ML Predict</div>
+          <div class="step-desc">resource_planner_model.pkl</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(6,182,212,.2);color:#67e8f9;">4</div>
+          <div class="step-title">Save WaterPlan</div>
+          <div class="step-desc">Persist to DB with risk level</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(6,182,212,.2);color:#67e8f9;">5</div>
+          <div class="step-title">Display Result</div>
+          <div class="step-desc">Water req. + conservation tips</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safety Checker Flow -->
+    <div class="card mb-lg">
+      <h3 class="mb-md">🔬 Water Safety Checker Flow</h3>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(16,185,129,.2);color:#6ee7b7;">1</div>
+          <div class="step-title">User Input</div>
+          <div class="step-desc">Location, source type, usage</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(16,185,129,.2);color:#6ee7b7;">2</div>
+          <div class="step-title">Feature Encode</div>
+          <div class="step-desc">Input normalisation</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(16,185,129,.2);color:#6ee7b7;">3</div>
+          <div class="step-title">ML Predict</div>
+          <div class="step-desc">safety_checker_model.pkl</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(16,185,129,.2);color:#6ee7b7;">4</div>
+          <div class="step-title">Classify</div>
+          <div class="step-desc">Safe / Warning / Unsafe</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(16,185,129,.2);color:#6ee7b7;">5</div>
+          <div class="step-title">Advise</div>
+          <div class="step-desc">SafetyCheck record + advice</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Flow -->
+    <div class="card">
+      <h3 class="mb-md">🗺️ Interactive Map Visualization Flow</h3>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(245,158,11,.2);color:#fcd34d;">1</div>
+          <div class="step-title">Year Filter</div>
+          <div class="step-desc">User selects year</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(245,158,11,.2);color:#fcd34d;">2</div>
+          <div class="step-title">Query DB</div>
+          <div class="step-desc">Filter GroundwaterData by state + year</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(245,158,11,.2);color:#fcd34d;">3</div>
+          <div class="step-title">Geocode</div>
+          <div class="step-desc">Nominatim → lat/lon lookup</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(245,158,11,.2);color:#fcd34d;">4</div>
+          <div class="step-title">Cache Marker</div>
+          <div class="step-desc">Store in MapMarker model</div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num" style="background:rgba(245,158,11,.2);color:#fcd34d;">5</div>
+          <div class="step-title">Render Map</div>
+          <div class="step-desc">Leaflet.js overlay</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DATA MODEL
+══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="datamodel">
+  <div class="container">
+    <div class="section-label">Database Design</div>
+    <h2>Core Data Models</h2>
+    <p class="mb-lg">The 12 Django models form a coherent relational schema centred on groundwater data and user activity.</p>
+
+    <div class="grid-3">
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(6,182,212,.08);">
+          <span style="color:#67e8f9;">📊</span>
+          <span style="color:#67e8f9;">GroundwaterData</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">state</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">district</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">year</span><span class="field-type">IntegerField</span></li>
+          <li><span class="field-name">extraction_pct</span><span class="field-type">FloatField</span></li>
+          <li><span class="field-name">recharge_rate</span><span class="field-type">FloatField</span></li>
+          <li><span class="field-name">status</span><span class="field-type">CharField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(37,99,235,.08);">
+          <span style="color:#93c5fd;">👤</span>
+          <span style="color:#93c5fd;">User &amp; UserProfile</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">email</span><span class="field-type">EmailField (unique)</span></li>
+          <li><span class="field-name">role</span><span class="field-type">CharField (3 choices)</span></li>
+          <li><span class="field-name">is_verified</span><span class="field-type">BooleanField</span></li>
+          <li><span class="field-name">state</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">district</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">profile_photo</span><span class="field-type">ImageField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(139,92,246,.08);">
+          <span style="color:#c4b5fd;">💬</span>
+          <span style="color:#c4b5fd;">ChatConversation</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">user</span><span class="field-type">FK → User</span></li>
+          <li><span class="field-name">query</span><span class="field-type">TextField</span></li>
+          <li><span class="field-name">response</span><span class="field-type">TextField</span></li>
+          <li><span class="field-name">district</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">timestamp</span><span class="field-type">DateTimeField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(16,185,129,.08);">
+          <span style="color:#6ee7b7;">📊</span>
+          <span style="color:#6ee7b7;">GroundwaterReport</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">user</span><span class="field-type">FK → User</span></li>
+          <li><span class="field-name">district</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">years_covered</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">chart_data</span><span class="field-type">JSONField</span></li>
+          <li><span class="field-name">created_at</span><span class="field-type">DateTimeField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(245,158,11,.08);">
+          <span style="color:#fcd34d;">💧</span>
+          <span style="color:#fcd34d;">WaterPlan</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">user</span><span class="field-type">FK → User</span></li>
+          <li><span class="field-name">land_size</span><span class="field-type">FloatField</span></li>
+          <li><span class="field-name">crop_type</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">season</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">water_req</span><span class="field-type">FloatField (ML output)</span></li>
+          <li><span class="field-name">risk_level</span><span class="field-type">CharField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(244,63,94,.08);">
+          <span style="color:#fda4af;">🔬</span>
+          <span style="color:#fda4af;">SafetyCheck</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">user</span><span class="field-type">FK → User</span></li>
+          <li><span class="field-name">source_type</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">location</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">result</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">advice</span><span class="field-type">TextField</span></li>
+          <li><span class="field-name">checked_at</span><span class="field-type">DateTimeField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(100,116,139,.08);">
+          <span style="color:#94a3b8;">📍</span>
+          <span style="color:#94a3b8;">MapMarker</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">groundwater_data</span><span class="field-type">FK → GroundwaterData</span></li>
+          <li><span class="field-name">latitude</span><span class="field-type">FloatField</span></li>
+          <li><span class="field-name">longitude</span><span class="field-type">FloatField</span></li>
+          <li><span class="field-name">cached_at</span><span class="field-type">DateTimeField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(37,99,235,.08);">
+          <span style="color:#93c5fd;">📧</span>
+          <span style="color:#93c5fd;">EmailOTP</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">user</span><span class="field-type">FK → User</span></li>
+          <li><span class="field-name">otp</span><span class="field-type">CharField(6)</span></li>
+          <li><span class="field-name">created_at</span><span class="field-type">DateTimeField</span></li>
+          <li><span class="field-name">is_used</span><span class="field-type">BooleanField</span></li>
+        </ul>
+      </div>
+
+      <div class="model-card">
+        <div class="model-header" style="background:rgba(16,185,129,.08);">
+          <span style="color:#6ee7b7;">📋</span>
+          <span style="color:#6ee7b7;">WaterScheme</span>
+        </div>
+        <ul class="model-fields">
+          <li><span class="field-name">name</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">state</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">category</span><span class="field-type">CharField</span></li>
+          <li><span class="field-name">description</span><span class="field-type">TextField</span></li>
+          <li><span class="field-name">eligibility</span><span class="field-type">TextField</span></li>
+          <li><span class="field-name">benefits</span><span class="field-type">TextField</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     USER ROLES
+══════════════════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="roles">
+  <div class="container">
+    <div class="section-label">Access Control</div>
+    <h2>User Roles &amp; Permissions</h2>
+    <p class="mb-lg">INGRES-AI serves three distinct user personas, each with a tailored dashboard and feature set.</p>
+
+    <div class="grid-3">
+
+      <div class="role-card public">
+        <div class="role-icon">🌾</div>
+        <div class="role-title">Public User</div>
+        <p style="font-size:.83rem;">Citizens, farmers, and the general public seeking water information and advice.</p>
+        <ul class="role-list">
+          <li>Public Dashboard (local groundwater data)</li>
+          <li>AI Water Buddy Chatbot</li>
+          <li>Water Resource Planner</li>
+          <li>Water Safety Checker</li>
+          <li>Government Schemes Directory</li>
+          <li>Interactive Map View</li>
+          <li>Profile management</li>
+        </ul>
+      </div>
+
+      <div class="role-card researcher">
+        <div class="role-icon">🔬</div>
+        <div class="role-title">Researcher</div>
+        <p style="font-size:.83rem;">Scientists and academics analysing groundwater trends and generating research reports.</p>
+        <ul class="role-list">
+          <li>All Public User features</li>
+          <li>Researcher Dashboard</li>
+          <li>Multi-year Trend Reports</li>
+          <li>CSV Data Export</li>
+          <li>Report history &amp; audit trail</li>
+          <li>Technical reference tools</li>
+        </ul>
+      </div>
+
+      <div class="role-card official">
+        <div class="role-icon">🏛️</div>
+        <div class="role-title">Official</div>
+        <p style="font-size:.83rem;">Government water management officials responsible for data entry and system monitoring.</p>
+        <ul class="role-list">
+          <li>Official Dashboard</li>
+          <li>Bulk groundwater data upload</li>
+          <li>System analytics &amp; monitoring</li>
+          <li>View all chat logs</li>
+          <li>Notification management</li>
+          <li>District data administration</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Hierarchy diagram -->
+    <div class="card mt-xl">
+      <h3 class="mb-md">📍 Data Hierarchy (FR-2.3)</h3>
+      <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;">
+        <div style="text-align:center;padding:16px 24px;">
+          <div style="font-size:1.8rem;">🇮🇳</div>
+          <div style="font-size:.8rem;font-weight:700;margin-top:6px;">National</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">India</div>
+        </div>
+        <div style="color:var(--text-muted);font-size:1.2rem;padding:8px;">→</div>
+        <div style="text-align:center;padding:16px 24px;">
+          <div style="font-size:1.8rem;">📍</div>
+          <div style="font-size:.8rem;font-weight:700;margin-top:6px;">State</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">AP, KA, MH …</div>
+        </div>
+        <div style="color:var(--text-muted);font-size:1.2rem;padding:8px;">→</div>
+        <div style="text-align:center;padding:16px 24px;">
+          <div style="font-size:1.8rem;">🏘️</div>
+          <div style="font-size:.8rem;font-weight:700;margin-top:6px;">District</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">13 pre-seeded</div>
+        </div>
+        <div style="color:var(--text-muted);font-size:1.2rem;padding:8px;">→</div>
+        <div style="text-align:center;padding:16px 24px;">
+          <div style="font-size:1.8rem;">👤</div>
+          <div style="font-size:.8rem;font-weight:700;margin-top:6px;">User Profile</div>
+          <div style="font-size:.72rem;color:var(--text-muted);">Personalised view</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ML MODELS
+══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="ml">
+  <div class="container">
+    <div class="section-label">AI &amp; Machine Learning</div>
+    <h2>ML Models &amp; AI Integration</h2>
+    <p class="mb-lg">Two custom Scikit-learn models trained on Indian agricultural and water quality datasets, plus Google Gemini for conversational AI.</p>
+
+    <div class="grid-2 mb-lg">
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(6,182,212,.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;">💧</div>
+          <div>
+            <div style="font-weight:700;">Resource Planner Model</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">resource_planner_model.pkl</div>
+          </div>
+        </div>
+        <p style="font-size:.85rem;">Predicts water requirements for crops based on land size, crop type, and season. Trained on <code>resource_planner_dataset.csv</code>.</p>
+        <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="badge badge-cyan">Input: land_size</span>
+          <span class="badge badge-cyan">Input: crop_type</span>
+          <span class="badge badge-cyan">Input: season</span>
+          <span class="badge badge-green">Output: water_requirement (L)</span>
+          <span class="badge badge-amber">Output: risk_level</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🔬</div>
+          <div>
+            <div style="font-weight:700;">Safety Checker Model</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">safety_checker_model.pkl</div>
+          </div>
+        </div>
+        <p style="font-size:.85rem;">Classifies water quality as Safe / Warning / Unsafe based on source type and location. Trained on <code>safety_checker_dataset.csv</code>.</p>
+        <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="badge badge-cyan">Input: source_type</span>
+          <span class="badge badge-cyan">Input: location</span>
+          <span class="badge badge-cyan">Input: usage</span>
+          <span class="badge badge-green">Output: Safe</span>
+          <span class="badge badge-amber">Output: Warning</span>
+          <span class="badge badge-rose">Output: Unsafe</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RAG Architecture -->
+    <div class="card">
+      <h3 class="mb-md">🤖 RAG Chatbot Architecture</h3>
+      <div class="feature-row">
+        <div>
+          <p style="font-size:.9rem;margin-bottom:16px;">The chatbot uses a <strong style="color:var(--text);">Retrieval-Augmented Generation (RAG)</strong> architecture to ensure factually accurate, non-hallucinated responses about groundwater data.</p>
+          <ul class="feature-list">
+            <li><span class="check">✓</span> User query parsed for district name and year</li>
+            <li><span class="check">✓</span> Exact GroundwaterData record retrieved from DB via Django ORM</li>
+            <li><span class="check">✓</span> Retrieved facts (extraction %, recharge rate, status) injected into Gemini prompt</li>
+            <li><span class="check">✓</span> Gemini AI explains the data in natural language</li>
+            <li><span class="check">✓</span> Conversation logged to ChatConversation model</li>
+            <li><span class="check">✓</span> Graceful fallback if no district data found</li>
+          </ul>
+        </div>
+        <div class="feature-visual">
+          <div style="color:#c4b5fd;font-weight:700;">RAG Pipeline</div>
+          <br/>
+          <div>User: <span style="color:#93c5fd;">"Guntur groundwater 2022"</span></div>
+          <br/>
+          <div>↓ Parse → district=<span style="color:#6ee7b7;">Guntur</span>, year=<span style="color:#6ee7b7;">2022</span></div>
+          <br/>
+          <div>↓ ORM: GroundwaterData.objects.get(</div>
+          <div>&nbsp;&nbsp;district=<span style="color:#6ee7b7;">"Guntur"</span>,</div>
+          <div>&nbsp;&nbsp;year=<span style="color:#6ee7b7;">2022</span></div>
+          <div>)</div>
+          <br/>
+          <div>↓ Context: extraction=<span style="color:#fcd34d;">78%</span>,</div>
+          <div>&nbsp;&nbsp;recharge=<span style="color:#fcd34d;">65 mm/yr</span></div>
+          <br/>
+          <div>↓ Gemini prompt + context</div>
+          <br/>
+          <div style="color:#6ee7b7;">→ "Guntur district in 2022 had a</div>
+          <div style="color:#6ee7b7;">&nbsp;&nbsp;78% extraction rate indicating...</div>
+          <div style="color:#6ee7b7;">&nbsp;&nbsp;conservation advice: ..."</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SETUP GUIDE
+══════════════════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="setup">
+  <div class="container">
+    <div class="section-label">Getting Started</div>
+    <h2>Setup &amp; Installation</h2>
+    <p class="mb-lg">Get INGRES-AI running locally in a few minutes.</p>
+
+    <div class="grid-2">
+      <div>
+        <div class="setup-step">
+          <div class="setup-num">1</div>
+          <div class="setup-content">
+            <h4>Clone &amp; Create Virtual Environment</h4>
+            <p>Clone the repository and set up an isolated Python environment.</p>
+            <div class="code-block">git clone https://github.com/satviksrivatsav/INGRES-AI.git
+cd INGRES-AI
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate</div>
+          </div>
+        </div>
+
+        <div class="setup-step">
+          <div class="setup-num">2</div>
+          <div class="setup-content">
+            <h4>Install Dependencies</h4>
+            <p>Install all pinned Python packages from <code>req.txt</code>.</p>
+            <div class="code-block">pip install -r req.txt</div>
+          </div>
+        </div>
+
+        <div class="setup-step">
+          <div class="setup-num">3</div>
+          <div class="setup-content">
+            <h4>Configure Environment</h4>
+            <p>Create a <code>.env</code> file in the project root with your secrets.</p>
+            <div class="code-block">SECRET_KEY=your-django-secret-key
+DEBUG=True
+AI_API_KEY=your-google-gemini-api-key
+EMAIL_HOST_USER=your-gmail@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password</div>
+          </div>
+        </div>
+
+        <div class="setup-step">
+          <div class="setup-num">4</div>
+          <div class="setup-content">
+            <h4>Apply Migrations &amp; Seed Data</h4>
+            <p>Create the database schema and populate initial data.</p>
+            <div class="code-block">python manage.py migrate
+python seed_groundwater.py
+python seed_schemes.py</div>
+          </div>
+        </div>
+
+        <div class="setup-step">
+          <div class="setup-num">5</div>
+          <div class="setup-content">
+            <h4>Run Development Server</h4>
+            <p>Start the Django development server and open your browser.</p>
+            <div class="code-block">python manage.py runserver
+# Visit: http://127.0.0.1:8000</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- ML Model Training -->
+        <div class="card mb-md">
+          <h3 class="mb-md" style="font-size:.95rem;">🤖 Train ML Models (Optional)</h3>
+          <p style="font-size:.83rem;margin-bottom:12px;">Pre-trained <code>.pkl</code> files are excluded from Git (see <code>.gitignore</code>). To train from scratch:</p>
+          <ol style="list-style:decimal;padding-left:20px;font-size:.82rem;color:var(--text-muted);line-height:2;">
+            <li>Open <code>WATER.ipynb</code> in Google Colab</li>
+            <li>Upload <code>resource_planner_dataset.csv</code> and <code>safety_checker_dataset.csv</code></li>
+            <li>Run all cells to train &amp; export <code>.pkl</code> files</li>
+            <li>Place the generated files in <code>portal/ml_models/</code></li>
+          </ol>
+        </div>
+
+        <!-- Environment Variables -->
+        <div class="card mb-md">
+          <h3 class="mb-md" style="font-size:.95rem;">🔐 Required Environment Variables</h3>
+          <ul style="list-style:none;font-size:.82rem;line-height:2.2;">
+            <li><code style="color:#93c5fd;">SECRET_KEY</code> — Django secret key</li>
+            <li><code style="color:#93c5fd;">DEBUG</code> — <code>True</code> for dev, <code>False</code> for prod</li>
+            <li><code style="color:#67e8f9;">AI_API_KEY</code> — Google Gemini API key</li>
+            <li><code style="color:#6ee7b7;">EMAIL_HOST_USER</code> — Gmail address for OTP</li>
+            <li><code style="color:#6ee7b7;">EMAIL_HOST_PASSWORD</code> — Gmail app password</li>
+          </ul>
+        </div>
+
+        <!-- i18n -->
+        <div class="card">
+          <h3 class="mb-md" style="font-size:.95rem;">🌍 Internationalization</h3>
+          <p style="font-size:.83rem;margin-bottom:10px;">Compile translation messages for Hindi and Telugu support:</p>
+          <div class="code-block">django-admin compilemessages</div>
+          <p style="font-size:.78rem;margin-top:8px;color:var(--text-muted);">Locale files are in <code>/locale/</code>. Language selection uses a cookie-based switcher in the UI.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FEATURES HIGHLIGHT
+══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-label">Key Capabilities</div>
+    <h2>Feature Highlights</h2>
+    <p class="mb-xl">Everything built into the platform to serve farmers, researchers, and government officials.</p>
+
+    <div class="grid-4">
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">🤖</div>
+        <h3 style="font-size:.95rem;">AI Chatbot (RAG)</h3>
+        <p style="font-size:.8rem;">Retrieval-grounded Gemini chatbot. Zero hallucination — only real DB data.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">💧</div>
+        <h3 style="font-size:.95rem;">Water Planner</h3>
+        <p style="font-size:.8rem;">ML-based crop water requirement prediction with conservation tips.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">🔬</div>
+        <h3 style="font-size:.95rem;">Safety Checker</h3>
+        <p style="font-size:.8rem;">Water quality assessment: Safe / Warning / Unsafe classification.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">🗺️</div>
+        <h3 style="font-size:.95rem;">Interactive Maps</h3>
+        <p style="font-size:.8rem;">Leaflet.js maps with real-time geocoding and year-based filters.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">📊</div>
+        <h3 style="font-size:.95rem;">Trend Reports</h3>
+        <p style="font-size:.8rem;">Multi-year groundwater trend analysis with CSV export for researchers.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">📋</div>
+        <h3 style="font-size:.95rem;">Scheme Directory</h3>
+        <p style="font-size:.8rem;">Searchable government water scheme catalogue by state and category.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">🌍</div>
+        <h3 style="font-size:.95rem;">Multilingual</h3>
+        <p style="font-size:.8rem;">English, Hindi, and Telugu — cookie-based language switcher.</p>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">🔐</div>
+        <h3 style="font-size:.95rem;">OTP Auth</h3>
+        <p style="font-size:.8rem;">Email OTP verification for secure, role-based sign-up and login.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">INGRES<span>-AI</span></div>
+    <p>Groundwater Resource Intelligence &amp; Management System</p>
+    <p style="margin-top:4px;">Final Year Project · Django · Gemini AI · Scikit-learn</p>
+    <ul class="footer-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#techstack">Tech Stack</a></li>
+      <li><a href="#modules">Modules</a></li>
+      <li><a href="#workflows">Workflows</a></li>
+      <li><a href="#datamodel">Data Model</a></li>
+      <li><a href="#roles">Roles</a></li>
+      <li><a href="#setup">Setup</a></li>
+      <li><a href="https://github.com/satviksrivatsav/INGRES-AI" target="_blank">GitHub ↗</a></li>
+    </ul>
+    <p style="margin-top:16px;font-size:.78rem;">Built with ❤️ for water resource management in India</p>
+  </div>
+</footer>
+
+</body>
+</html>
