@@ -12,6 +12,16 @@
             <i class="fa-solid fa-circle-check text-5xl text-blue-600 animate-bounce"></i>
         </div>
 
+        {% if is_official %}
+        <h1 class="heading-font text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
+            Account <span class="text-blue-600">Pending Approval</span>
+        </h1>
+
+        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.25em] leading-relaxed mb-12 px-2">
+            Identity confirmed. Your profile requires admin approval. <br>
+            <span class="text-slate-500">You can log in once an admin activates your account.</span>
+        </p>
+        {% else %}
         <h1 class="heading-font text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
             Account <span class="text-blue-600">Verified</span>
         </h1>
@@ -20,6 +30,7 @@
             Identity confirmed. Your profile is now fully active[cite: 908, 966]. <br>
             <span class="text-slate-500">Redirecting to your personalized dashboard...</span>
         </p>
+        {% endif %}
         
         <div class="space-y-6">
             <a href="{% url 'accounts:login' %}"

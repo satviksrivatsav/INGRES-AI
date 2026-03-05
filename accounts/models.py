@@ -4,6 +4,12 @@ from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
 
+class ResearchDomainWhitelist(models.Model):
+    domain = models.CharField(max_length=255, unique=True, help_text="e.g., institution.edu, org.name.org")
+
+    def __str__(self):
+        return self.domain
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:

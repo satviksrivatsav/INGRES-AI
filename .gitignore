@@ -85,3 +85,8 @@ htmlcov/
 *.key
 secrets.json
 credentials.json
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

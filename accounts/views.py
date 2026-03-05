@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import EmailOTP, UserProfile
+from .models import EmailOTP, UserProfile, ResearchDomainWhitelist
 
 User = get_user_model()
 
@@ -24,7 +24,10 @@ def login_view(request):
         if user:
             # 1. Verification Check: Ensure OTP process was completed
             if not user.is_active:
-                messages.error(request, 'Verification Pending: Please verify your email via OTP.')
+                if user.is_verified and user.role == 'official':
+                    messages.error(request, 'Account Pending: Awaiting admin approval.')
+                else:
+                    messages.error(request, 'Verification Pending: Please verify your email via OTP.')
                 return render(request, 'accounts/login.html')
 
             login(request, user)
@@ -58,6 +61,12 @@ def signup_view(request):
         password = request.POST.get('password')
         # FR-1.1: Capture the dynamic role selected by the user
         role = request.POST.get('role', 'public') 
+
+        if role == 'researcher':
+            domain = email.split('@')[-1]
+            if not ResearchDomainWhitelist.objects.filter(domain=domain).exists():
+                messages.error(request, 'Your email domain is not authorized for Research access.')
+                return redirect('accounts:signup')
 
         # 1. Existence Check: Prevent duplicate accounts
         if User.objects.filter(email=email).exists():
@@ -116,14 +125,17 @@ def verify_otp_view(request):
         otp_obj = EmailOTP.objects.filter(user=user).first()
 
         if otp_obj and not otp_obj.is_expired() and entered_otp == otp_obj.otp:
-            user.is_active = True
             user.is_verified = True
+            if user.role == 'official':
+                user.is_active = False
+            else:
+                user.is_active = True
             user.save()
 
             otp_obj.delete()
             del request.session['verify_user']
 
-            return render(request, 'accounts/verify_success.html')
+            return render(request, 'accounts/verify_success.html', {'is_official': user.role == 'official'})
 
         messages.error(request, 'Invalid or expired OTP.')
 
