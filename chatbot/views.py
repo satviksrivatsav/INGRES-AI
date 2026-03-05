@@ -9,8 +9,11 @@ from portal.models import GroundwaterData
 
 
 # Initialize Gemini Client (New SDK)
-client = genai.Client(api_key=settings.AI_API_KEY)
-
+try:
+    client = genai.Client(api_key=settings.AI_API_KEY) if getattr(settings, 'AI_API_KEY', None) else None
+except Exception as e:
+    client = None
+    print(f"Warning: Gemini Client initialization failed: {e}")
 
 def clean_markdown(text):
     """Removes markdown for a clean professional UI."""
